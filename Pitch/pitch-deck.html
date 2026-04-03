@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>iDojo — Gamification Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #0a0a1a;
+  --bg-card: rgba(255,255,255,0.04);
+  --bg-card-hover: rgba(255,255,255,0.07);
+  --cyan: #00e5ff;
+  --green: #00e676;
+  --purple: #b388ff;
+  --pink: #ff4081;
+  --orange: #ffab40;
+  --yellow: #ffd740;
+  --text: #ffffff;
+  --text-dim: rgba(255,255,255,0.6);
+  --text-muted: rgba(255,255,255,0.35);
+  --border: rgba(255,255,255,0.08);
+  --radius: 16px;
+  --radius-sm: 10px;
+}
+
+html { scroll-snap-type: y mandatory; scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: #ffffff;
+  color: var(--text);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Slide wrapper ─────────────────────────── */
+.slide-wrapper {
+  min-height: 100vh;
+  scroll-snap-align: start;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 40px;
+}
+
+/* ── Slide base ────────────────────────────── */
+.slide {
+  width: 100%;
+  max-width: 1400px;
+  min-height: calc(100vh - 64px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 60px 80px;
+  position: relative;
+  overflow: hidden;
+  background: var(--bg);
+  border-radius: 32px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+}
+
+/* ── Slide counter ─────────────────────────── */
+.slide-counter {
+  position: absolute;
+  bottom: 28px;
+  right: 40px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  letter-spacing: 2px;
+}
+
+/* ── Typography ────────────────────────────── */
+.slide-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--cyan);
+  margin-bottom: 16px;
+}
+h1 { font-size: clamp(40px, 5vw, 72px); font-weight: 800; line-height: 1.1; }
+h2 { font-size: clamp(28px, 3.5vw, 48px); font-weight: 700; line-height: 1.15; }
+h3 { font-size: clamp(18px, 2vw, 24px); font-weight: 600; line-height: 1.3; }
+p, li { font-size: clamp(14px, 1.2vw, 18px); line-height: 1.7; color: var(--text-dim); }
+
+.accent-cyan { color: var(--cyan); }
+.accent-green { color: var(--green); }
+.accent-purple { color: var(--purple); }
+.accent-pink { color: var(--pink); }
+.accent-orange { color: var(--orange); }
+
+/* ── Cards ─────────────────────────────────── */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 32px;
+  transition: background 0.3s;
+}
+.card:hover { background: var(--bg-card-hover); }
+
+.card-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-top: 32px;
+}
+.card-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  margin-top: 32px;
+}
+
+.card .icon {
+  width: 48px; height: 48px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px;
+  margin-bottom: 16px;
+}
+.icon-cyan { background: rgba(0,229,255,0.12); color: var(--cyan); }
+.icon-green { background: rgba(0,230,118,0.12); color: var(--green); }
+.icon-purple { background: rgba(179,136,255,0.12); color: var(--purple); }
+.icon-pink { background: rgba(255,64,129,0.12); color: var(--pink); }
+.icon-orange { background: rgba(255,171,64,0.12); color: var(--orange); }
+.icon-yellow { background: rgba(255,215,64,0.12); color: var(--yellow); }
+
+.card h3 { margin-bottom: 8px; }
+.card p { font-size: 14px; }
+
+/* ── Split layout ──────────────────────────── */
+.split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+}
+.split-text ul {
+  list-style: none;
+  margin-top: 20px;
+}
+.split-text ul li {
+  padding: 8px 0;
+  padding-left: 24px;
+  position: relative;
+}
+.split-text ul li::before {
+  content: '→';
+  position: absolute;
+  left: 0;
+  color: var(--cyan);
+  font-weight: 600;
+}
+
+/* ── Phone mockup ──────────────────────────── */
+.phone-stack {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  align-items: flex-start;
+}
+.phone-frame {
+  width: 240px;
+  border-radius: 24px;
+  overflow: hidden;
+  border: 2px solid var(--border);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  flex-shrink: 0;
+}
+.phone-frame img {
+  width: 100%;
+  display: block;
+}
+
+/* ── Screenshot strip ──────────────────────── */
+.screenshot-strip {
+  display: flex;
+  gap: 16px;
+  margin-top: 32px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+.screenshot-strip .phone-frame { width: 180px; }
+
+/* ── Placeholder ───────────────────────────── */
+.placeholder {
+  border: 2px dashed rgba(255,255,255,0.15);
+  border-radius: var(--radius);
+  padding: 40px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  text-align: center;
+  min-height: 120px;
+}
+
+/* ── Punchline ─────────────────────────────── */
+.punchline {
+  margin-top: 40px;
+  padding: 20px 28px;
+  background: linear-gradient(135deg, rgba(0,229,255,0.06), rgba(179,136,255,0.06));
+  border-left: 3px solid var(--cyan);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: clamp(14px, 1.3vw, 18px);
+  font-style: italic;
+  color: var(--text-dim);
+}
+
+/* ── Flow diagram ──────────────────────────── */
+.flow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 36px;
+  flex-wrap: wrap;
+}
+.flow-box {
+  padding: 14px 28px;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 15px;
+  white-space: nowrap;
+}
+.flow-box.platform { background: rgba(0,229,255,0.1); border: 1px solid rgba(0,229,255,0.25); color: var(--cyan); }
+.flow-box.widget { background: rgba(179,136,255,0.1); border: 1px solid rgba(179,136,255,0.25); color: var(--purple); }
+.flow-box.result { background: rgba(0,230,118,0.1); border: 1px solid rgba(0,230,118,0.25); color: var(--green); }
+.flow-arrow { font-size: 24px; color: var(--text-muted); }
+
+/* ── Stat cards ────────────────────────────── */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin: 32px 0;
+}
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px 24px;
+  text-align: center;
+}
+.stat-card .stat-value {
+  font-size: 36px;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--cyan), var(--purple));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.stat-card .stat-label {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 6px;
+  font-weight: 500;
+}
+
+/* ── Vertical list bars ────────────────────── */
+.bar-list { margin-top: 28px; }
+.bar-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 20px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+  background: var(--bg-card);
+  border-left: 4px solid;
+}
+.bar-item .bar-title { font-weight: 600; font-size: 15px; }
+.bar-item .bar-desc { font-size: 13px; color: var(--text-dim); }
+
+/* ── Bullet icons ──────────────────────────── */
+.bullet-list { list-style: none; margin-top: 20px; }
+.bullet-list li {
+  padding: 10px 0 10px 36px;
+  position: relative;
+  font-size: 15px;
+}
+.bullet-list li::before {
+  content: '✦';
+  position: absolute;
+  left: 0;
+  color: var(--cyan);
+  font-size: 14px;
+}
+
+/* ── CTA ───────────────────────────────────── */
+.cta-button {
+  display: inline-block;
+  padding: 20px 48px;
+  background: linear-gradient(135deg, var(--cyan), var(--purple));
+  border-radius: 60px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--bg);
+  text-decoration: none;
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+}
+.cta-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0,229,255,0.3);
+}
+
+/* ── Steps row ─────────────────────────────── */
+.steps-row {
+  display: flex;
+  gap: 32px;
+  margin-top: 40px;
+  justify-content: center;
+}
+.step-item {
+  text-align: center;
+  flex: 1;
+  max-width: 240px;
+}
+.step-num {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--cyan), var(--purple));
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800;
+  font-size: 20px;
+  color: var(--bg);
+  margin: 0 auto 12px;
+}
+
+/* ── Video ─────────────────────────────────── */
+.video-container {
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  max-width: 560px;
+}
+.video-container video {
+  width: 100%;
+  display: block;
+}
+
+/* ── Hub screenshot (larger, centered) ─────── */
+.hub-screenshot {
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 2px solid var(--border);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  max-width: 300px;
+}
+.hub-screenshot img {
+  width: 100%;
+  display: block;
+}
+
+/* ── Mobile: expandable cards ──────────────── */
+.expandable-card .card-expand-body {
+  /* visible by default on desktop */
+}
+.expandable-card .card-expand-toggle {
+  display: none; /* hidden on desktop */
+}
+
+/* ── Mobile: concise text ──────────────────── */
+.mobile-hide { }
+.mobile-show { display: none; }
+
+/* ── Responsive ────────────────────────────── */
+@media (max-width: 900px) {
+  .slide-wrapper { padding: 12px; }
+  .slide { padding: 36px 20px; border-radius: 24px; min-height: calc(100vh - 24px); }
+  .split { grid-template-columns: 1fr; gap: 24px; }
+  .card-grid-3 { grid-template-columns: 1fr; }
+  .card-grid-2 { grid-template-columns: 1fr; }
+  .stat-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .stat-card { padding: 16px 12px; }
+  .stat-value { font-size: 28px; }
+  .phone-stack { flex-direction: column; align-items: center; }
+  .flow { flex-direction: column; }
+  .flow-arrow { transform: rotate(90deg); }
+  .flow-box { padding: 10px 20px; font-size: 14px; }
+  .bar-list { margin-top: 0; }
+  .bar-item { padding: 10px 14px; }
+  .punchline { font-size: 14px; padding: 14px 18px; margin-top: 20px; }
+  h2 { font-size: 22px !important; }
+  h3 { font-size: 17px !important; }
+  .slide-label { font-size: 11px; letter-spacing: 3px; margin-bottom: 10px; }
+
+  /* Tighter bullet spacing on mobile */
+  ul li, .bullet-list li, .split-text ul li { padding-top: 2px !important; padding-bottom: 2px !important; font-size: 14px !important; }
+
+  /* Mobile text swap */
+  .mobile-hide { display: none !important; }
+  .mobile-show { display: block !important; }
+  li.mobile-show { display: list-item !important; }
+  h2.mobile-show { display: block !important; }
+
+  /* ── Expandable cards ── */
+  .expandable-card .card-expand-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+  }
+  .expandable-card.expanded .card-expand-body {
+    max-height: 200px;
+  }
+  .expandable-card .card-expand-toggle {
+    display: block;
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--cyan);
+    cursor: pointer;
+    font-weight: 600;
+    letter-spacing: 1px;
+  }
+  .expandable-card .card-expand-toggle::after { display: inline; }
+  .expandable-card.expanded .card-expand-toggle::after { content: ' ▲'; }
+  .expandable-card:not(.expanded) .card-expand-toggle::after { content: ' ▼'; }
+  .expandable-card .card-expand-toggle { display: inline-block !important; white-space: nowrap; }
+
+  /* ── HERO ── */
+  #slide-1 { justify-content: flex-start !important; padding-top: 60px !important; }
+  #slide-1 img[src="iDojo.webp"] { height: 60px !important; margin-bottom: 20px !important; }
+  #slide-1 h2 { font-size: 20px !important; max-width: 65% !important; }
+  #slide-1 p { font-size: 14px !important; }
+  #slide-1 img[src="Eagle_3.webp"] { height: 50% !important; right: -10px !important; bottom: 0 !important; }
+
+  /* ── SLIDE 2: Problem ── */
+  #slide-2 .card { padding: 16px; }
+  #slide-2 .card .icon { width: 40px; height: 40px; font-size: 20px; margin-bottom: 10px; }
+
+  /* ── SLIDE 3: Solution ── */
+  #slide-3 .split-text ul { margin-top: 12px; }
+  #slide-3 .split-text ul li { font-size: 14px; padding: 5px 0 5px 20px; }
+  #slide-3 .split > div:last-child > div > div { width: 220px !important; height: 440px !important; border-radius: 28px !important; }
+
+  /* ── SLIDE 4: Progression ── */
+  #slide-4 .split-text ul li { font-size: 14px; padding: 4px 0 4px 20px; }
+  #slide-4 #prog-slider { max-width: 220px !important; }
+
+  /* ── SLIDE 5: Core Modules ── */
+  #slide-5 { padding: 36px 20px !important; }
+  #slide-5 > h2 { margin-bottom: 16px !important; }
+  #slide-5 > div { grid-template-columns: 1fr !important; gap: 20px !important; }
+  #slide-5 .modules-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+  }
+  #slide-5 .module-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px;
+    cursor: pointer;
+  }
+  #slide-5 .module-card h3 { font-size: 13px !important; margin-bottom: 0 !important; }
+  #slide-5 .module-card h3 span:first-child { width: 20px !important; height: 20px !important; line-height: 20px !important; font-size: 10px !important; margin-right: 4px !important; }
+  #slide-5 > div > div:last-child { max-width: 260px !important; margin: 0 auto; }
+  #slide-5 div[style*="box-shadow"], #slide-6 div[style*="box-shadow"] {
+    box-shadow: inset 0 30px 25px -10px var(--bg), inset 0 -30px 25px -10px var(--bg), inset 12px 0 10px -6px var(--bg), inset -12px 0 10px -6px var(--bg) !important;
+  }
+
+  /* ── SLIDE 6: F2P Games ── */
+  #slide-6 { padding: 36px 20px !important; }
+  #slide-6 > div { grid-template-columns: 1fr !important; gap: 20px !important; }
+  #slide-6 .f2p-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    cursor: pointer;
+    margin-bottom: 8px !important;
+  }
+  #slide-6 .f2p-card h3 { margin-bottom: 0 !important; }
+  #slide-6 > div > div:last-child > div { width: 240px !important; margin: 0 auto; }
+
+  /* ── SLIDE 7: Collection Engine ── */
+  #slide-7 .split-text ul { padding-left: 0 !important; margin-left: 0 !important; }
+  #slide-7 .split-text ul li { font-size: 13px; padding-left: 18px !important; }
+  #slide-7 #wc-slider { max-width: 240px !important; }
+
+  /* ── SLIDE 8: Operator Control ── */
+  #slide-8 .bullet-list li { font-size: 14px; padding: 6px 0 6px 28px; }
+
+  /* ── SLIDE 9: Integration ── */
+  #slide-9 .card { padding: 12px 14px; display: flex !important; flex-direction: row !important; align-items: center; gap: 12px; }
+  #slide-9 .card .icon { width: 36px; height: 36px; font-size: 18px; margin-bottom: 0 !important; flex-shrink: 0; }
+  #slide-9 .card h3 { font-size: 14px !important; margin-bottom: 2px !important; }
+  #slide-9 > p { font-size: 13px !important; }
+  #slide-9 .flow { gap: 8px !important; }
+  #slide-9 .flow-box { padding: 8px 14px !important; font-size: 12px !important; }
+  #slide-9 .flow-arrow { font-size: 18px !important; }
+  .infra-stats { display: none !important; }
+
+  /* ── SLIDE 12: Who We Are ── */
+  #slide-12 > div:last-of-type { grid-template-columns: 1fr !important; gap: 20px !important; }
+
+  /* ── SLIDE 13: Closing ── */
+  #slide-13 { justify-content: flex-start !important; padding-top: 50px !important; }
+  .steps-row { flex-direction: row !important; gap: 12px !important; }
+  .step-item { flex: 1; }
+  .step-num { width: 36px; height: 36px; font-size: 16px; }
+  .step-item h3 { font-size: 13px !important; }
+  #slide-13 img[src="Eagle_1.webp"] { height: 40% !important; left: 50% !important; transform: translateX(-50%); opacity: 1 !important; }
+  #slide-13 h2 { font-size: 20px !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════
+     SLIDE 1 — COVER
+     ════════════════════════════════════════════ -->
+<div class="slide-wrapper"><section class="slide" id="slide-1" style="justify-content: center; align-items: center; text-align: center;">
+  <img src="iDojo.webp" alt="iDojo" style="height: 80px; margin-bottom: 28px; filter: drop-shadow(0 0 30px rgba(0,229,255,0.3));">
+  <h2 style="font-size: clamp(24px, 3vw, 44px); font-weight: 700; max-width: 640px; line-height: 1.4; margin-bottom: 12px;">
+    Plug-and-play user behaviour platform<br>for <span class="accent-cyan">guided loyalty</span>
+  </h2>
+  <p style="font-size: clamp(14px, 1.2vw, 18px); color: #f5a623; font-weight: 600; margin-bottom: 8px;">
+    Designed by video game veterans.
+  </p>
+
+  <img src="Eagle_3.webp" alt="Eagle mascot" style="position: absolute; bottom: 0; right: 40px; height: 72%; filter: drop-shadow(0 10px 40px rgba(0,0,0,0.4)); pointer-events: none;">
+  <span class="slide-counter">01 / 12</span>
+</section></div>
+
+<!-- ════════════════════════════════════════════
+     SLIDE 2 — THE PROBLEM
+     ════════════════════════════════════════════ -->
+<div class="slide-wrapper"><section class="slide" id="slide-2">
+  <span class="slide-label">The Problem</span>
+  <h2>Why traditional retention<br>doesn't work</h2>
+
+  <div class="card-grid-3">
+    <div class="card expandable-card" onclick="this.classList.toggle('expanded')">
+      <div class="icon icon-pink">🎣</div>
+      <h3>Bonus hunters grab and go</h3>
+      <div class="card-expand-body"><p>No loyalty, no retention, just cost. Players collect the bonus and disappear.</p></div>
+      <span class="card-expand-toggle">Details</span>
+    </div>
+    <div class="card expandable-card" onclick="this.classList.toggle('expanded')">
+      <div class="icon icon-orange">😴</div>
+      <h3>Traditional loyalty is passive</h3>
+      <div class="card-expand-body"><p>Points pile up, players don't care. No emotional connection, no urgency.</p></div>
+      <span class="card-expand-toggle">Details</span>
+    </div>
+    <div class="card expandable-card" onclick="this.classList.toggle('expanded')">
+      <div class="icon icon-purple">🎯</div>
+      <h3>No guided behaviour</h3>
+      <div class="card-expand-body"><p>Betting activity goes unrewarded and undirected. You're leaving money on the table.</p></div>
+      <span class="card-expand-toggle">Details</span>
+    </div>
+  </div>
+
+  <div class="punchline">
+    "Gamification is guided loyalty. Timed actions that shape real behaviour."
+  </div>
+
+  <span class="slide-counter">02 / 12</span>
+</section></div>
+
+<!-- ════════════════════════════════════════════
+     SLIDE 3 — THE SOLUTION
+     ════════════════════════════════════════════ -->
+<div class="slide-wrapper"><section class="slide" id="slide-3">
+  <span class="slide-label">The Solution</span>
+  <div class="split">
+    <div class="split-text">
+      <h2 class="mobile-hide">A real-time engagement layer on top of your platform</h2>
+      <h2 class="mobile-show">Real-time engagement layer</h2>
+      <ul>
+        <li class="mobile-hide">Every user action (bet, deposit, login) feeds a progression engine</li>
+        <li class="mobile-show" style="display:none;">Every action feeds a progression engine</li>
+        <li class="mobile-hide">Players get instant feedback: level-ups, missions, rewards, rank</li>
+        <li class="mobile-show" style="display:none;">Instant feedback: levels, missions, rewards</li>
+        <li class="mobile-hide">Operators get full control from a dashboard</li>
+        <li class="mobile-show" style="display:none;">Full operator dashboard control</li>
+        <li><strong style="color: var(--orange);">Near-miss moments</strong> 🥕</li>
+        <li><strong style="color: var(--green);">Result:</strong> players stay because they're building something</li>
+      </ul>
+    </div>
+    <div style="display:flex; justify-content:center;">
+      <div style="width: 300px; height: 620px; border-radius: 36px; overflow: hidden; border: 3px solid rgba(255,255,255,0.06); box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(0,229,255,0.08); position: relative; background: #0a0a1a;">
+        <video id="balkanbet-video" muted loop playsinline preload="auto" style="width: 100%; height: 100%; object-fit: cover;"
+          src="BalkanBet.mp4"
+        ></video>
+      </div>
+    </div>
+  </div>
+  <span class="slide-counter">03 / 12</span>
+</section></div>
+
+<!-- ════════════════════════════════════════════
+     SLIDE 4 — PROGRESSION & LEVELING
+     ════════════════════════════════════════════ -->
+<div class="slide-wrapper"><section class="slide" id="slide-4">
+  <span class="slide-label">Progression & Leveling</span>
+  <div class="split">
+    <div class="split-text">
+      <h2>Every action counts toward something</h2>
+      <ul>
+        <li class="mobile-hide">XP rates configurable per channel: Casino, Sportsbook, Live, Deposits, Virtual</li>
+        <li class="mobile-show" style="display:none;">XP configurable per channel</li>
+        <li class="mobile-hide">Levels + sublevels (up to 100 per level)</li>
+        <li class="mobile-show" style="display:none;">Levels + sublevels (100 per level)</li>
+        <li class="mobile-hide">Per-level benefits auto-granted: cashback, free spins, VIP access</li>
+        <li class="mobile-show" style="display:none;">Auto-granted benefits per level</li>
+        <li>Custom in-game currency</li>
+        <li><strong style="color: var(--purple);">AI-Powered Progression Assistance</strong></li>
+      </ul>
+    </div>
+    <div>
+      <div id="prog-slider" style="position: relative; width: 100%; max-width: 300px; margin: 0 auto;">
+        <div style="overflow: hidden; border-radius: 24px;">
+          <div id="prog-slider-track" style="display: flex; transition: transform 0.5s ease;">
+            <img src="Screenshots/Levels.webp" alt="Level 1 Neptune" style="width: 100%; flex-shrink: 0; display: block;">
+            <img src="Screenshots/Levels 2.webp" alt="Level 6 Earth" style="width: 100%; flex-shrink: 0; display: block;">
+          </div>
+        </div>
+        <div id="prog-dots" style="display: flex; justify-content: center; gap: 8px; margin-top: 14px;">
+          <button onclick="goToProgSlide(0)" style="width: 10px; height: 10px; border-radius: 50%; border: none; background: var(--cyan); cursor: pointer; padding: 0;"></button>
+          <button onclick="goToProgSlide(1)" style="width: 10px; height: 10px; border-radius: 50%; border: none; background: var(--text-muted); cursor: pointer; padding: 0;"></button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <span class="slide-counter">04 / 12</span>
+</section></div>
+
+<!-- ════════════════════════════════════════════
+     SLIDE 5 — SUPPORTING MODULES
+     ════════════════════════════════════════════ -->
+<div class="slide-wrapper"><section class="slide" id="slide-5" style="padding: 56px 80px;">
+  <span class="slide-label">Core Modules</span>
+  <h2 style="margin-bottom: 28px;">Everything players interact with</h2>
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center;">
+    <!-- Left: 6 modules in 2 columns (3+3) -->
+    <div class="modules-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px 36px;">
+      <div class="module-card expandable-card" onclick="this.classList.toggle('expanded')">
+        <h3 style="margin-bottom: 8px;"><span style="display: inline-block; width: 26px; height: 26px; border-radius: 50%; background: var(--cyan); color: var(--bg); font-size: 13px; font-weight: 800; text-align: center; line-height: 26px; margin-right: 6px;">1</span><span class="accent-cyan">Missions</span></h3>
+        <div class="card-expand-body"><ul style="list-style: none;">
+          <li style="padding: 4px 0 4px 20px; position: relative; font-size: 13px; color: var(--text-dim);"><span style="position:absolute;left:0;color:var(--cyan);">→</span>3 types: Game, Ticket, Merged</li>
+          <li style="padding: 4px 0 4px 20px; position: relative; font-size: 13px; color: var(--text-dim);"><span style="position:absolute;left:0;color:var(--cyan);">→</span>4 mechanics: Spin, Bet, Win, Lose</li>
+        </ul></div>
+        <span class="card-expand-toggle">Details</span>
+      </div>
+      <div class="module-card expandable-card" onclick="this.classList.toggle('expanded')">
+        <h3 style="margin-bottom: 8px;"><span style="display: inline-block; width: 26px; height: 26px; border-radius: 50%; background: var(--orange); color: var(--bg); font-size: 13px; font-weight: 800; text-align: center; line-height: 26px; margin-right: 6px;">4</span><span class="accent-orange">Tournaments</span></h3>
+        <div class="card-expand-body"><ul style="list-style: none;">
+          <li style="padding: 4px 0 4px 20px; position: relative; font-size: 13px; color: var(--text-dim);"><span style="position:absolute;left:0;color:var(--orange);">→</span>Game or Ticket-based, 3 metrics</li>
+          <li style="padding: 4px 0 4px 20px; position: relative; font-size: 13px; color: var(--text-dim);"><span style="position:absolute;left:0;color:var(--orange);">→</span>Free / Deposit / Cash / Currency</li>
+        </ul></div>
+        <span class="card-expand-toggle">Details</span>
+      </div>
+      <div class="module-card expandable-card" onclick="this.classList.toggle('expanded')">
+        <h3 style="margin-bottom: 8px;"><span style="display: inline-block; width: 26px; height: 26px; border-radius: 50%; background: var(--green); color: var(--bg); font-size: 13px; font-weight: 800; text-align: center; line-height: 26px; margin-right: 6px;">2</span><span class="accent-green">Daily Login</span></h3>
+        <div class="card-expand-body"><ul style="list-style: none;">
+          <li style="padding: 4px 0 4px 20px; position: relative; font-size: 13px; color: var(--text-dim);"><span style="position:absolute;left:0;color:var(--green);">→</span>7 or 30-day streaks</li>
+          <li style="padding: 4px 0 4px 20px; position: relative; font-size: 13px; color: var(--text-dim);"><span style="position:absolute;left:0;color:var(--green);">→</span>Escalating rewards</li>
+        </ul></div>
+        <span class="card-expand-toggle">Details</span>
+      </div>
+      <div class="module-card expandable-card" onclick="this.classList.toggle('expanded')">
+        <h3 style="margin-bottom: 8px;"><span style="display: inline-block; width: 26px; height: 26px; border-radius: 50%; background: var(--purple); color: var(--bg); font-size: 13px; font-weight: 800; text-align: center; line-height: 26px; margin-right: 6px;">5</span><span class="accent-purple">Leaderboards</span></h3>
+        <div class="card-expand-body"><ul style="list-style: none;">
+          <li style="padding: 4px 0 4px 20px; position: relative; font-size: 13px; color: var(--text-dim);"><span style="position:absolute;left:0;color:var(--purple);">→</span>Top-3 podium, real-time</li>
+          <li style="padding: 4px 0 4px 20px; position: relative; font-size: 13px; color: var(--text-dim);"><span style="position:absolute;left:0;color:var(--purple);">→</span>Player rank always pinned</li>
+        </ul></div>
+        <span class="card-expand-toggle">Details</span>
+      </div>
+      <div class="module-card expandable-card" onclick="this.classList.toggle('expanded')">
+        <h3 style="margin-bottom: 8px;"><span style="display: inline-block; width: 26px; height: 26px; border-radius: 50%; background: var(--pink); color: var(--bg); font-size: 13px; font-weight: 800; text-align: center; line-height: 26px; margin-right: 6px;">3</span><span class="accent-pink">Shop</span></h3>
+        <div class="card-expand-body"><ul style="list-style: none;">
+          <li style="padding: 4px 0 4px 20px; position: relative; font-size: 13px; color: var(--text-dim);"><span style="position:absolute;left:0;color:var(--pink);">→</span>Level-gated items, discounts</li>
+          <li style="padding: 4px 0 4px 20px; position: relative; font-size: 13px; color: var(--text-dim);"><span style="position:absolute;left:0;color:var(--pink);">→</span>Stock limits, time-limited offers</li>
+        </ul></div>
+        <span class="card-expand-toggle">Details</span>
+      </div>
+      <div class="module-card expandable-card" onclick="this.classList.toggle('expanded')">
+        <h3 style="margin-bottom: 8px;"><span style="display: inline-block; width: 26px; height: 26px; border-radius: 50%; background: var(--yellow); color: var(--bg); font-size: 13px; font-weight: 800; text-align: center; line-height: 26px; margin-right: 6px;">6</span><span style="color: var(--yellow);">Custom Currency</span></h3>
+        <div class="card-expand-body"><ul style="list-style: none;">
+          <li style="padding: 4px 0 4px 20px; position: relative; font-size: 13px; color: var(--text-dim);"><span style="position:absolute;left:0;color:var(--yellow);">→</span>Custom pricing, in-game economy</li>
+          <li style="padding: 4px 0 4px 20px; position: relative; font-size: 13px; color: var(--text-dim);"><span style="position:absolute;left:0;color:var(--yellow);">→</span>Earned through progression</li>
+        </ul></div>
+        <span class="card-expand-toggle">Details</span>
+      </div>
+    </div>
+    <!-- Right: Video (zoomed in) -->
+    <div style="display: flex; justify-content: center; align-items: center;">
+      <div style="width: 320px; aspect-ratio: 9/16; overflow: hidden; position: relative;">
+        <video id="idojo-features-video" muted playsinline preload="auto" style="position: absolute; top: 50%; left: 50%; width: 130%; transform: translate(-50%, -50%); object-fit: cover;"
+          src="iDojo.mp4?v=features"
+        ></video>
+        <div style="position:absolute;inset:0;pointer-events:none;
+          box-shadow: inset 0 50px 40px -10px var(--bg), inset 0 -50px 40px -10px var(--bg), inset 25px 0 20px -8px var(--bg), inset -25px 0 20px -8px var(--bg);
+        "></div>
+      </div>
+    </div>
+  </div>
+  <span class="slide-counter">05 / 12</span>
+</section></div>
+
+<!-- ════════════════════════════════════════════
+     SLIDE 6 — FREE-TO-PLAY GAMES
+     ════════════════════════════════════════════ -->
+<div class="slide-wrapper"><section class="slide" id="slide-6" style="padding: 56px 80px;">
+  <span class="slide-label">Free-to-Play Games</span>
+  <h2 style="margin-bottom: 28px;">Mechanics that drive daily return visits</h2>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center;">
+    <!-- Left: text -->
+    <div class="f2p-cards">
+      <div class="f2p-card expandable-card" onclick="this.classList.toggle('expanded')" style="margin-bottom: 20px;">
+        <h3 style="margin-bottom: 10px;"><span class="accent-cyan">Wheel of Fortune</span></h3>
+        <div class="card-expand-body"><ul style="list-style: none;">
+          <li style="padding: 5px 0 5px 22px; position: relative; font-size: 15px; color: var(--text-dim);"><span style="position:absolute;left:0;color:var(--cyan);">→</span>5–20 configurable slots</li>
+          <li style="padding: 5px 0 5px 22px; position: relative; font-size: 15px; color: var(--text-dim);"><span style="position:absolute;left:0;color:var(--cyan);">→</span>Server-side weighted probability</li>
+          <li style="padding: 5px 0 5px 22px; position: relative; font-size: 15px; color: var(--text-dim);"><span style="position:absolute;left:0;color:var(--cyan);">→</span>Tiered per level</li>
+        </ul></div>
+        <span class="card-expand-toggle">Details</span>
+      </div>
+      <div class="f2p-card expandable-card" onclick="this.classList.toggle('expanded')">
+        <h3 style="margin-bottom: 10px;"><span class="accent-purple">Chests</span></h3>
+        <div class="card-expand-body"><ul style="list-style: none;">
+          <li style="padding: 5px 0 5px 22px; position: relative; font-size: 15px; color: var(--text-dim);"><span style="position:absolute;left:0;color:var(--purple);">→</span>Tiered per level</li>
+          <li style="padding: 5px 0 5px 22px; position: relative; font-size: 15px; color: var(--text-dim);"><span style="position:absolute;left:0;color:var(--purple);">→</span>Configurable lock (24h+)</li>
+          <li style="padding: 5px 0 5px 22px; position: relative; font-size: 15px; color: var(--text-dim);"><span style="position:absolute;left:0;color:var(--purple);">→</span>3D animated opening</li>
+        </ul></div>
+        <span class="card-expand-toggle">Details</span>
+      </div>
+    </div>
+    <!-- Right: video slider — fixed 9:16 container -->
+    <div style="display: flex; justify-content: center; align-items: center;">
+      <div style="width: 320px; aspect-ratio: 9/16; overflow: hidden; position: relative; background: var(--bg);">
+        <video id="wheel-video" muted playsinline preload="auto" style="position: absolute; top: 50%; left: 50%; width: 115%; transform: translate(-50%, -50%); object-fit: cover;"
+          src="iDojo.mp4?v=wheel"
+        ></video>
+        <video id="chest-video" muted playsinline preload="auto" style="position: absolute; top: 50%; left: 50%; height: 100%; transform: translate(-50%, -50%); object-fit: cover; display: none;"
+          src="Chest.mp4"
+        ></video>
+        <div style="position:absolute;inset:0;pointer-events:none;
+          box-shadow: inset 0 50px 40px -10px var(--bg), inset 0 -50px 40px -10px var(--bg), inset 50px 0 40px -10px var(--bg), inset -50px 0 40px -10px var(--bg);
+        "></div>
+        <!-- Dots -->
+        <div id="f2p-dots" style="position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; z-index: 2;">
+          <button style="width: 10px; height: 10px; border-radius: 50%; border: none; background: var(--cyan); cursor: pointer; padding: 0;"></button>
+          <button style="width: 10px; height: 10px; border-radius: 50%; border: none; background: var(--text-muted); cursor: pointer; padding: 0;"></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <span class="slide-counter">06 / 12</span>
+</section></div>
+
+<!-- ════════════════════════════════════════════
+     SLIDE 7 — WORLD CUP 2026 COLLECTION ENGINE
+     ════════════════════════════════════════════ -->
+<div class="slide-wrapper"><section class="slide" id="slide-7" style="padding: 48px 80px;">
+  <span class="slide-label">Collection Engine</span>
+  <div class="split" style="gap: 48px;">
+    <div class="split-text">
+      <h2 style="margin-bottom: 16px;">The mechanic no one else has</h2>
+      <ul>
+        <li>80 collectibles, 4 rarity tiers, 105+ reward triggers</li>
+        <li>Bet → pack → reveal → collect</li>
+        <li>Scarcity drives repeat sessions</li>
+        <li><strong style="color: var(--green);">Bring Your Crew</strong> collectors become recruiters</li>
+        <li>Replicable to any event, any season</li>
+      </ul>
+    </div>
+    <div>
+      <!-- Screenshot slider -->
+      <div id="wc-slider" style="position: relative; width: 100%; max-width: 340px; margin: 0 auto;">
+        <div style="overflow: hidden; border-radius: 24px;">
+          <div id="wc-slider-track" style="display: flex; transition: transform 0.5s ease;">
+            <img src="Screenshots/Teams 1.webp" alt="Germany completed" style="width: 100%; flex-shrink: 0; display: block;">
+            <img src="Screenshots/WC2026.webp" alt="Pack ready to open" style="width: 100%; flex-shrink: 0; display: block;">
+            <img src="Screenshots/WC2026 2.webp" alt="Pack reveal" style="width: 100%; flex-shrink: 0; display: block;">
+            <img src="Screenshots/Mystery Pack.webp" alt="Free-to-play games" style="width: 100%; flex-shrink: 0; display: block;">
+          </div>
+        </div>
+        <!-- Dots -->
+        <div id="wc-dots" style="display: flex; justify-content: center; gap: 8px; margin-top: 14px;">
+          <button onclick="goToSlide(0)" style="width: 10px; height: 10px; border-radius: 50%; border: none; background: var(--cyan); cursor: pointer; padding: 0;"></button>
+          <button onclick="goToSlide(1)" style="width: 10px; height: 10px; border-radius: 50%; border: none; background: var(--text-muted); cursor: pointer; padding: 0;"></button>
+          <button onclick="goToSlide(2)" style="width: 10px; height: 10px; border-radius: 50%; border: none; background: var(--text-muted); cursor: pointer; padding: 0;"></button>
+          <button onclick="goToSlide(3)" style="width: 10px; height: 10px; border-radius: 50%; border: none; background: var(--text-muted); cursor: pointer; padding: 0;"></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <span class="slide-counter">07 / 12</span>
+</section></div>
+
+<!-- ════════════════════════════════════════════
+     SLIDE 8 — OPERATOR CONTROL (Admin Panel)
+     ════════════════════════════════════════════ -->
+<div class="slide-wrapper"><section class="slide" id="slide-8">
+  <span class="slide-label">Operator Control</span>
+  <div class="split">
+    <div class="split-text">
+      <h2>Full self-serve back-office</h2>
+      <ul class="bullet-list">
+        <li>Feature flags: toggle anything on/off</li>
+        <li class="mobile-hide">Wizard workflow: define → rewards → preview → publish</li>
+        <li class="mobile-show" style="display:none;">Wizard workflow: define → publish</li>
+        <li class="mobile-hide">Versioned publishing with rollback</li>
+        <li>Multi-tenant: one deployment, many brands</li>
+        <li class="mobile-hide">Penalty system: XP reduction + benefit lock for re-engagement</li>
+        <li class="mobile-show" style="display:none;">Penalty system for re-engagement</li>
+        <li><strong style="color: var(--purple);">AI-Powered Analytics Assistance</strong></li>
+      </ul>
+    </div>
+    <div style="display: flex; justify-content: center;">
+      <div style="overflow: hidden; border-radius: var(--radius); border: 1px solid var(--border); max-width: 640px;">
+        <img src="dashboard.webp" alt="Admin Panel Dashboard" style="width: 100%; display: block;">
+      </div>
+    </div>
+  </div>
+  <span class="slide-counter">08 / 12</span>
+</section></div>
+
+<!-- ════════════════════════════════════════════
+     SLIDE 9 — INTEGRATION & INFRASTRUCTURE
+     ════════════════════════════════════════════ -->
+<div class="slide-wrapper"><section class="slide" id="slide-9">
+  <span class="slide-label">Integration & Infrastructure</span>
+  <h2>Enterprise-ready from day one</h2>
+  <p style="margin-top: 8px; font-size: 17px; color: var(--text-dim);">Designed to be easy to integrate. Minimal effort on your side, maximum impact on your players.</p>
+
+  <div class="card-grid-3">
+    <div class="card expandable-card" onclick="this.classList.toggle('expanded')">
+      <div class="icon icon-cyan">⚡</div>
+      <h3>Easy Integration</h3>
+      <div class="card-expand-body"><p>iFrame widget drops into any site or mobile app. No rebuild, no heavy lifting.</p></div>
+      <span class="card-expand-toggle">Details</span>
+    </div>
+    <div class="card expandable-card" onclick="this.classList.toggle('expanded')">
+      <div class="icon icon-orange">🔗</div>
+      <h3>Kafka Event Layer</h3>
+      <div class="card-expand-body"><p>Real-time event streaming into your core platform. Bets, deposits, logins, all ingested via Kafka.</p></div>
+      <span class="card-expand-toggle">Details</span>
+    </div>
+    <div class="card expandable-card" onclick="this.classList.toggle('expanded')">
+      <div class="icon icon-green">🔒</div>
+      <h3>GDPR Compliant</h3>
+      <div class="card-expand-body"><p>UUID-only player identification. No personal data touches our servers.</p></div>
+      <span class="card-expand-toggle">Details</span>
+    </div>
+  </div>
+
+  <div class="flow">
+    <div class="flow-box platform">Your Core Platform</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-box" style="background: rgba(255,171,64,0.1); border: 1px solid rgba(255,171,64,0.25); color: var(--orange);">Kafka Event Bus</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-box widget">iDojo Engine</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-box result">iFrame Widget → Players</div>
+  </div>
+
+  <p class="infra-stats" style="margin-top: 24px; text-align: center; font-size: 14px; color: var(--text-muted);">1,000+ events/sec · Multi-tenant · Scalable</p>
+
+  <span class="slide-counter">09 / 12</span>
+</section></div>
+
+<!-- ════════════════════════════════════════════
+     SLIDE 10 — BUSINESS MODEL
+     ════════════════════════════════════════════ -->
+<div class="slide-wrapper"><section class="slide" id="slide-10" style="align-items: center; text-align: center;">
+  <span class="slide-label">Business Model</span>
+  <h2 style="margin-bottom: 48px;">Two-part pricing model</h2>
+
+  <div class="card-grid-2" style="max-width: 900px; margin: 0 auto;">
+    <div class="card" style="text-align: left; border-top: 3px solid var(--cyan);">
+      <h3 style="font-size: 22px; margin-bottom: 12px;">Setup & Integration Fee</h3>
+      <p style="font-size: 16px; color: var(--text-dim); line-height: 1.8;">One-time fee covering:</p>
+      <ul style="list-style: none; margin-top: 12px;">
+        <li style="padding: 6px 0 6px 24px; position: relative; font-size: 15px; color: var(--text-dim);"><span style="position: absolute; left: 0; color: var(--cyan);">✓</span> Full tailor-made UI/UX design</li>
+        <li style="padding: 6px 0 6px 24px; position: relative; font-size: 15px; color: var(--text-dim);"><span style="position: absolute; left: 0; color: var(--cyan);">✓</span> Platform integration (Kafka + iFrame)</li>
+        <li style="padding: 6px 0 6px 24px; position: relative; font-size: 15px; color: var(--text-dim);"><span style="position: absolute; left: 0; color: var(--cyan);">✓</span> Configuration & launch support</li>
+      </ul>
+    </div>
+    <div class="card" style="text-align: left; border-top: 3px solid var(--green);">
+      <h3 style="font-size: 22px; margin-bottom: 12px;">Monthly SaaS Fee</h3>
+      <p style="font-size: 16px; color: var(--text-dim); line-height: 1.8;">Recurring fee covering:</p>
+      <ul style="list-style: none; margin-top: 12px;">
+        <li style="padding: 6px 0 6px 24px; position: relative; font-size: 15px; color: var(--text-dim);"><span style="position: absolute; left: 0; color: var(--green);">✓</span> Full platform access & updates</li>
+        <li style="padding: 6px 0 6px 24px; position: relative; font-size: 15px; color: var(--text-dim);"><span style="position: absolute; left: 0; color: var(--green);">✓</span> Infrastructure costs included</li>
+        <li style="padding: 6px 0 6px 24px; position: relative; font-size: 15px; color: var(--text-dim);"><span style="position: absolute; left: 0; color: var(--green);">✓</span> Ongoing support</li>
+      </ul>
+    </div>
+  </div>
+
+  <span class="slide-counter">10 / 12</span>
+</section></div>
+
+<!-- ════════════════════════════════════════════
+     SLIDE 12 — WHO WE ARE (Miracle Dojo)
+     ════════════════════════════════════════════ -->
+<div class="slide-wrapper"><section class="slide" id="slide-12">
+  <span class="slide-label">Who We Are</span>
+  <h2 style="margin-bottom: 4px;">MIRACLE DOJO</h2>
+  <p style="font-style: italic; margin-bottom: 8px; color: #f5a623;">Gamification pioneers with a decade of game development expertise</p>
+
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="stat-value">2015</div>
+      <div class="stat-label">Founded</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">10+</div>
+      <div class="stat-label">Gaming Veterans</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">1M+</div>
+      <div class="stat-label">Players Worldwide</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">6</div>
+      <div class="stat-label">Games Shipped</div>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start;">
+    <div>
+      <div class="bar-list" style="margin-top: 0;">
+        <div class="bar-item" style="border-left-color: var(--cyan);">
+          <div><div class="bar-title">iDojo Platform</div><div class="bar-desc">Gamification as a service</div></div>
+        </div>
+        <div class="bar-item" style="border-left-color: var(--pink);">
+          <div><div class="bar-title">Celebrities</div><div class="bar-desc">Celebrity-driven experiences</div></div>
+        </div>
+        <div class="bar-item" style="border-left-color: var(--green);">
+          <div><div class="bar-title">Education & Brands</div><div class="bar-desc">Engagement solutions</div></div>
+        </div>
+        <div class="bar-item" style="border-left-color: var(--orange);">
+          <div><div class="bar-title">Sport</div><div class="bar-desc">Karate / Karate Combat</div></div>
+        </div>
+      </div>
+
+    </div>
+
+    <div style="display: flex; justify-content: center; align-items: center;">
+      <div style="overflow: hidden; border-radius: var(--radius); border: 1px solid var(--border);">
+        <video id="portfolio-video" muted loop playsinline preload="auto" style="width: 100%; display: block;"
+          src="portfolio.mp4"
+        ></video>
+      </div>
+    </div>
+  </div>
+
+  <span class="slide-counter">11 / 12</span>
+</section></div>
+
+<!-- ════════════════════════════════════════════
+     SLIDE 13 — BALKANBET DEMO + NEXT STEPS
+     ════════════════════════════════════════════ -->
+<div class="slide-wrapper"><section class="slide" id="slide-13" style="align-items: center; text-align: center; padding: 40px 80px;">
+  <span class="slide-label">Next Steps</span>
+  <h2 style="margin-bottom: 40px;">Let's get started</h2>
+
+  <div class="steps-row">
+    <div class="step-item">
+      <div class="step-num">1</div>
+      <h3>Demo</h3>
+    </div>
+    <div class="step-item">
+      <div class="step-num">2</div>
+      <h3>Pilot setup</h3>
+    </div>
+    <div class="step-item">
+      <div class="step-num">3</div>
+      <h3>Go live</h3>
+    </div>
+  </div>
+
+  <h2 style="margin-top: 44px; font-size: 28px; background: linear-gradient(135deg, var(--cyan), var(--purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">We decoded user behaviour</h2>
+
+  <p style="margin-top: 16px; font-size: 14px; color: var(--text-muted);">
+    mijalkovic@miracledojo.com &nbsp;·&nbsp; miracledojo.com
+  </p>
+
+  <img src="Eagle_1.webp" alt="BalkanBet Eagle" style="position: absolute; bottom: 0; left: 60px; height: 55%; filter: drop-shadow(0 10px 40px rgba(0,0,0,0.4)); pointer-events: none;">
+  <span class="slide-counter">12 / 12</span>
+</section></div>
+
+<script>
+(function() {
+  const config = {
+    'balkanbet-video':      { start: 0 },
+    'portfolio-video':      { start: 0 },
+    'idojo-features-video': { start: 14 }
+  };
+
+  // F2P video slider: wheel plays 7-14s, then switches to chest 1s-end, then back
+  const wheelV = document.getElementById('wheel-video');
+  const chestV = document.getElementById('chest-video');
+  const f2pDots = document.querySelectorAll('#f2p-dots button');
+  const f2pSlide = document.getElementById('slide-6');
+
+  function seekAndPlay(video, time) {
+    video.pause();
+    function doSeek() {
+      video.currentTime = time;
+      video.addEventListener('seeked', function onSeeked() {
+        video.removeEventListener('seeked', onSeeked);
+        video.play();
+      }, { once: true });
+    }
+    if (video.readyState >= 1) {
+      doSeek();
+    } else {
+      video.addEventListener('loadedmetadata', doSeek, { once: true });
+    }
+  }
+
+  function showF2PVideo(which) {
+    if (which === 'wheel') {
+      wheelV.style.display = '';
+      chestV.style.display = 'none';
+      chestV.pause();
+      seekAndPlay(wheelV, 7);
+      f2pDots[0].style.background = 'var(--cyan)';
+      f2pDots[1].style.background = 'var(--text-muted)';
+    } else {
+      wheelV.style.display = 'none';
+      chestV.style.display = '';
+      wheelV.pause();
+      seekAndPlay(chestV, 1);
+      f2pDots[0].style.background = 'var(--text-muted)';
+      f2pDots[1].style.background = 'var(--purple)';
+    }
+  }
+
+  if (wheelV && chestV) {
+    wheelV.addEventListener('timeupdate', () => {
+      if (wheelV.currentTime >= 14) showF2PVideo('chest');
+    });
+    chestV.addEventListener('timeupdate', () => {
+      if (chestV.currentTime >= 4.1) showF2PVideo('wheel');
+    });
+    f2pDots[0].addEventListener('click', () => showF2PVideo('wheel'));
+    f2pDots[1].addEventListener('click', () => showF2PVideo('chest'));
+
+    new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        showF2PVideo('wheel');
+      } else {
+        wheelV.pause();
+        chestV.pause();
+      }
+    }, { threshold: 0.3 }).observe(f2pSlide);
+  }
+
+  const videos = {};
+  document.querySelectorAll('video[id]').forEach(v => { videos[v.id] = v; });
+
+  // Loop videos within their start/end ranges
+  Object.entries(config).forEach(([id, cfg]) => {
+    const video = videos[id];
+    if (video && cfg.end) {
+      video.addEventListener('timeupdate', () => {
+        if (video.currentTime >= cfg.end) video.currentTime = cfg.start || 0;
+      });
+    }
+  });
+
+  // Observe each video's parent slide
+  Object.entries(config).forEach(([id, cfg]) => {
+    const video = videos[id];
+    if (!video) return;
+
+    const slide = video.closest('.slide');
+    if (!slide) return;
+
+    let chestTimeout = null;
+
+    new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        if (cfg.delayAfter) {
+          const trigger = videos[cfg.delayAfter];
+          if (trigger) {
+            seekAndPlay(trigger, config[cfg.delayAfter].start || 0);
+          }
+          chestTimeout = setTimeout(() => {
+            seekAndPlay(video, cfg.start || 0);
+          }, cfg.delay || 0);
+        } else {
+          seekAndPlay(video, cfg.start || 0);
+        }
+      } else {
+        if (chestTimeout) clearTimeout(chestTimeout);
+        video.pause();
+      }
+    }, { threshold: 0.3 }).observe(slide);
+  });
+})();
+
+// Progression slider
+let progCurrent = 0;
+const progTrack = document.getElementById('prog-slider-track');
+const progDots = document.querySelectorAll('#prog-dots button');
+function goToProgSlide(i) {
+  progCurrent = i;
+  progTrack.style.transform = 'translateX(-' + (i * 100) + '%)';
+  progDots.forEach((d, j) => d.style.background = j === i ? 'var(--cyan)' : 'var(--text-muted)');
+}
+const progSlide = document.getElementById('slide-4');
+let progInterval;
+if (progSlide) {
+  new IntersectionObserver(([entry]) => {
+    if (entry.isIntersecting) {
+      progInterval = setInterval(() => goToProgSlide((progCurrent + 1) % 2), 3000);
+    } else {
+      clearInterval(progInterval);
+      goToProgSlide(0);
+    }
+  }, { threshold: 0.3 }).observe(progSlide);
+}
+
+// WC Screenshot slider
+let wcCurrent = 0;
+const wcTrack = document.getElementById('wc-slider-track');
+const wcDots = document.querySelectorAll('#wc-dots button');
+function goToSlide(i) {
+  wcCurrent = i;
+  wcTrack.style.transform = 'translateX(-' + (i * 100) + '%)';
+  wcDots.forEach((d, j) => d.style.background = j === i ? 'var(--cyan)' : 'var(--text-muted)');
+}
+// Auto-advance every 3s when slide is visible
+const wcSlide = document.getElementById('slide-7');
+let wcInterval;
+if (wcSlide) {
+  new IntersectionObserver(([entry]) => {
+    if (entry.isIntersecting) {
+      wcInterval = setInterval(() => goToSlide((wcCurrent + 1) % 4), 3000);
+    } else {
+      clearInterval(wcInterval);
+      goToSlide(0);
+    }
+  }, { threshold: 0.3 }).observe(wcSlide);
+}
+</script>
+</body>
+</html>

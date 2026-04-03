@@ -8,4 +8,6 @@
 !MerkurXtiplogo.png
 !Teams/
 !Teams/*
+!Pitch/
+!Pitch/**
 .vercel
